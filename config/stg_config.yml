@@ -1,0 +1,13 @@
+RazorTrade:
+  acc_id: 1
+  log_path: /home/op/RazorTrade/log
+  md_mq: md_ctp
+  strategy_lib: /opt/RazorTrade/release/libmy_strategy.so
+  subscribed_ins:
+  - j2601
+  - p2601
+  - pp2601
+  - l2601
+  - IM2512
+  - au2510
+  time_line_folder_path: /home/op/RazorTrade/static/timeline

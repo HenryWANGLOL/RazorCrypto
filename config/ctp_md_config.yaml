@@ -1,0 +1,19 @@
+RazorTrade:
+    mode: md
+    acc_id: 1
+    md_mq: md_ctp
+    default_md_size: 10000
+
+CounterConfig:
+    m_td_addr: tcp://182.254.243.31:40001
+    m_md_addr: tcp://182.254.243.31:40011
+    m_user: "241512"
+    m_passwd: "YuanXiaoYu!123"
+    m_brokerid: "9999"
+    m_appid: "simnow_client_test"
+    m_authcode: "0000000000000000"
+    tempFolder: "/home/op/RazorTrade/log"
+    static_file_folder: /home/op/RazorTrade/static
+    time_line_folder_path: /home/op/RazorTrade/static/timeline
+
+

@@ -1,0 +1,4 @@
+pyStg:
+    md_name: md_ctp
+    subscribed_ins: [j2510]
+    static_path: /home/op/RazorTrade/static

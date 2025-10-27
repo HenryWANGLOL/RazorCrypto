@@ -1,0 +1,10 @@
+set(CoreServiceInclude /home/opp/RazorTrade/mht/include)
+set(CoreServiceLib /home/opp/RazorTrade/lib)
+set(BinReleaseFolder /home/opp/RazorTrade/release)
+# set(PythonInclude /home/op/anaconda3/envs/py38/include/python3.8)
+# set(PyBindInclude /home/op/anaconda3/envs/py38/include)
+
+add_compile_options(-Wno-unused-function)
+add_subdirectory(mht)
+add_subdirectory(api)
+add_subdirectory(Tools/MDRunner)

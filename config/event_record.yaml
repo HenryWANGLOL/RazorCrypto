@@ -1,0 +1,4 @@
+RazorTrade:
+    acc_id: 1
+    shm_name: RT_TradeEvent_xyyuan
+    output_folder: /home/xyyuan/RazorTrade/output/event_record
