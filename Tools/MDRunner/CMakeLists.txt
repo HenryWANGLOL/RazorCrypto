@@ -7,10 +7,6 @@ set(CMAKE_CONFIGURATION_TYPES Release)
 
 # 设置可执行文件输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY BinReleaseFolder)
-# 如果需要，设置静态库输出目录
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-# 如果需要，设置共享库输出目录
-# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,6 +37,7 @@ target_link_libraries(MDRunner
     OpenSSL::Crypto
 
 )
+target_link_options(MDRunner PRIVATE "-Wl,--export-dynamic")
 
 # 可选：设置编译选项（根据需要添加）
 target_compile_options(MDRunner PRIVATE -Wall -Wextra -g)
@@ -50,3 +47,4 @@ set_target_properties(MDRunner PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${BinReleaseFolder}
     RUNTIME_OUTPUT_DIRECTORY ${BinReleaseFolder}
 )
+

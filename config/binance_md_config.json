@@ -1,11 +1,11 @@
 {
     "RazorTrade": {
         "module_name": "RazorTradeCrypto",
-        "log_path": "/home/opp/RazorTrade/log"
+        "log_path": "/home/op/RazorTrade/log"
     },
     "connections": [
         {
-            "lib_path": "/home/opp/RazorTrade/release/libbinance_md.so",
+            "lib_path": "/home/op/RazorCrypto/release/libbinance_md.so",
             "exhange": "binance",
             "md_size": 100000,
             "spot": {

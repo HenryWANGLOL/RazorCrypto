@@ -18,7 +18,8 @@
 #include "RT_Common.h"
 #include "RT_MQ.h"
 #include "csv.h"
-
+#include "RT_Export.h"
+#include "rapidjson/document.h"
 #define BINANCE_WS_HOST "stream.binance.com"
 #define BINANCE_WS_UB_HOST "fstream.binance.com"
 #define BINANCE_WS_CB_HOST "dstream.binance.com"
@@ -636,3 +637,5 @@ private:
 extern "C" std::unique_ptr<RT_CryptoMDBase> create_mdlib(rapidjson::Document& json_config) {
     return std::unique_ptr<RT_CryptoMDBase>(new Binance_MD(json_config));
 }
+
+// K4TRADE_CREATE_INSTANCE(Binance_MD)

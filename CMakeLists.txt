@@ -1,6 +1,6 @@
-set(CoreServiceInclude /home/opp/RazorTrade/mht/include)
-set(CoreServiceLib /home/opp/RazorTrade/lib)
-set(BinReleaseFolder /home/opp/RazorTrade/release)
+set(CoreServiceInclude /home/op/RazorCrypto/mht/include)
+set(CoreServiceLib /home/op/RazorCrypto/lib)
+set(BinReleaseFolder /home/op/RazorCrypto/release)
 # set(PythonInclude /home/op/anaconda3/envs/py38/include/python3.8)
 # set(PyBindInclude /home/op/anaconda3/envs/py38/include)
 
