@@ -1,7 +1,0 @@
-RazorTrade:
-    acc_id: 1
-    log_path: /root/RazorTrade/log
-    subscribed_ins: [ag2510]
-    md_mq: md_ctpp
-    strategy_lib: /root/RazorTrade/release/libpy_stg.so
-python_strategy_path: "/root/RazorTrade/Stg/stgDemo/py/mystg.py"  # Python 策略脚本路径

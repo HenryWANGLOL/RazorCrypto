@@ -1,8 +1,8 @@
-set(CoreServiceInclude /home/op/RazorCrypto/mht/include)
-set(CoreServiceLib /home/op/RazorCrypto/lib)
-set(BinReleaseFolder /home/op/RazorCrypto/release)
-# set(PythonInclude /home/op/anaconda3/envs/py38/include/python3.8)
-# set(PyBindInclude /home/op/anaconda3/envs/py38/include)
+set(CoreServiceInclude /home/opp/RazorCrypto/mht/include)
+set(CoreServiceLib /home/opp/RazorCrypto/lib)
+set(BinReleaseFolder /home/opp/RazorCrypto/release)
+# set(PythonInclude /home/opp/anaconda3/envs/py38/include/python3.8)
+# set(PyBindInclude /home/opp/anaconda3/envs/py38/include)
 
 add_compile_options(-Wno-unused-function)
 add_subdirectory(mht)

@@ -1,0 +1,68 @@
+[14:45:31.587748][info]基类模块初始化完成: binance_md
+[14:45:31.588204][info]spot_bbo_shm_name: spot_bbo_xyyuan; spot_aggtrade_shm_name: spot_aggtrade_xyyuan
+[14:45:31.588209][info]fut_bbo_shm_name: future_bbo_xyyuan; fut_aggtrade_shm_name: future_aggtrade_xyyuan
+[14:45:31.588213][info]init_bookTicker_shm params: spot_shm_name=spot_bbo_xyyuan, fut_shm_name=future_bbo_xyyuan, spot_num=1, fut_num=1, buff_len=100000
+[14:45:31.736412][info]create_binance_spot_md fin
+[14:45:31.736439][info]sub_spot_agg_trade {		"method": "SUBSCRIBE",		"id":4,		"params" :["btcusdt@aggTrade"]}
+[14:45:31.736611][info]sub_spot_book_ticker {		"method": "SUBSCRIBE",		"id":1,		"params" :["btcusdt@bookTicker"]}
+[14:45:31.837185][info]create_binance_ubase_md fin
+[14:45:31.838444][info]sub_ubase_agg_trade {		"method": "SUBSCRIBE",		"id":5,		"params" :["btcusdt_251226@aggTrade"]}
+[14:45:31.838538][info]sub_ubase_book_ticker {		"method": "SUBSCRIBE",		"id":2,		"params" :["btcusdt_251226@bookTicker"]}
+[14:45:31.921971][info]msg received {"result":null,"id":5}
+[14:45:31.921999][info]msg received {"result":null,"id":2}
+[16:08:43.323588][info]基类模块初始化完成: binance_md
+[16:08:43.323674][info]spot_bbo_shm_name: spot_bbo_xyyuan; spot_aggtrade_shm_name: spot_aggtrade_xyyuan
+[16:08:43.323679][info]fut_bbo_shm_name: future_bbo_xyyuan; fut_aggtrade_shm_name: future_aggtrade_xyyuan
+[16:08:43.323685][info]init_bookTicker_shm params: spot_shm_name=spot_bbo_xyyuan, fut_shm_name=future_bbo_xyyuan, spot_num=1, fut_num=1, buff_len=100000
+[16:08:43.521414][info]create_binance_spot_md fin
+[16:08:43.521457][info]sub_spot_agg_trade {		"method": "SUBSCRIBE",		"id":4,		"params" :["btcusdt@aggTrade"]}
+[16:08:43.521686][info]sub_spot_book_ticker {		"method": "SUBSCRIBE",		"id":1,		"params" :["btcusdt@bookTicker"]}
+[16:08:43.622340][info]create_binance_ubase_md fin
+[16:08:43.622366][info]sub_ubase_agg_trade {		"method": "SUBSCRIBE",		"id":5,		"params" :["btcusdt_251226@aggTrade"]}
+[16:08:43.622470][info]sub_ubase_book_ticker {		"method": "SUBSCRIBE",		"id":2,		"params" :["btcusdt_251226@bookTicker"]}
+[16:08:43.643829][info]msg received {"result":null,"id":5}
+[16:08:43.743831][info]msg received {"result":null,"id":2}
+[16:13:02.417525][info]将模块绑定到 CPU 核心: 1
+[16:13:02.418416][info]绑核成功
+[16:13:02.418429][info]基类模块初始化完成: binance_md
+[16:13:02.418511][info]spot_bbo_shm_name: spot_bbo_xyyuan; spot_aggtrade_shm_name: spot_aggtrade_xyyuan
+[16:13:02.418516][info]fut_bbo_shm_name: future_bbo_xyyuan; fut_aggtrade_shm_name: future_aggtrade_xyyuan
+[16:13:02.418522][info]init_bookTicker_shm params: spot_shm_name=spot_bbo_xyyuan, fut_shm_name=future_bbo_xyyuan, spot_num=1, fut_num=1, buff_len=100000
+[16:13:02.576778][info]create_binance_spot_md fin
+[16:13:02.580427][info]sub_spot_agg_trade {		"method": "SUBSCRIBE",		"id":4,		"params" :["btcusdt@aggTrade"]}
+[16:13:02.580589][info]sub_spot_book_ticker {		"method": "SUBSCRIBE",		"id":1,		"params" :["btcusdt@bookTicker"]}
+[16:13:02.681178][info]create_binance_ubase_md fin
+[16:13:02.681200][info]sub_ubase_agg_trade {		"method": "SUBSCRIBE",		"id":5,		"params" :["btcusdt_251226@aggTrade"]}
+[16:13:02.681282][info]sub_ubase_book_ticker {		"method": "SUBSCRIBE",		"id":2,		"params" :["btcusdt_251226@bookTicker"]}
+[16:13:02.741199][info]msg received {"result":null,"id":5}
+[16:13:02.741229][info]msg received {"result":null,"id":2}
+[23:16:28.404781][info]基类模块初始化完成: binance_md
+[23:16:28.404786][info]======================SUNNY TRADE MD INIT =========================
+[23:16:29.987761][info]连接1统计初始化完成（类型：Spot）
+[23:16:30.041539][info]连接1成功建立
+[23:16:30.107657][info]连接1成功连接到stream.binance.com
+[23:16:30.107846][info]连接1已订阅3个交易对（aggTrade + bookTicker）
+[23:16:30.107849][info]连接2统计初始化完成（类型：Spot）
+[23:16:30.149882][info]连接2成功建立
+[23:16:30.220207][info]连接2成功连接到stream.binance.com
+[23:16:30.220538][info]连接2已订阅3个交易对（aggTrade + bookTicker）
+[23:16:30.220545][info]连接3统计初始化完成（类型：Spot）
+[23:16:30.257945][info]连接3成功建立
+[23:16:30.332535][info]连接3成功连接到stream.binance.com
+[23:16:30.332750][info]连接3已订阅3个交易对（aggTrade + bookTicker）
+[23:16:30.332792][info]连接100统计初始化完成（类型：UBase(Future)）
+[23:16:30.370375][info]连接100成功建立
+[23:16:30.433526][info]连接100成功连接到fstream.binance.com
+[23:16:30.433629][info]连接100已订阅2个交易对（aggTrade + bookTicker）
+[23:16:30.433633][info]连接101统计初始化完成（类型：UBase(Future)）
+[23:16:30.456847][info]连接101成功建立
+[23:16:30.497535][info]msg received {"result":null,"id":100}
+[23:16:30.497568][info]msg received {"result":null,"id":100}
+[23:16:30.537401][info]连接101成功连接到fstream.binance.com
+[23:16:30.537534][info]连接101已订阅2个交易对（aggTrade + bookTicker）
+[23:16:30.537630][info]所有连接初始化完成：Spot(3), UBase(Future)(2)
+[23:16:30.610434][info]msg received {"result":null,"id":101}
+[23:16:30.610459][info]msg received {"result":null,"id":101}
+[23:16:35.558459][info]
+==================== 连接速度对比（延迟单位：微秒） ====================
+[23:16:35.564925][info]Spot 连接统计：
