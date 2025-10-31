@@ -6,7 +6,7 @@ Created by YufengWang, 20241226
 
 // Created by Yufeng Wang
 #pragma once
-#include <yaml-cpp/yaml.h>
+#include "rapidjson/document.h"
 
 #ifdef _WIN32
     #ifdef XTRADE_EXPORTS
@@ -21,7 +21,7 @@ Created by YufengWang, 20241226
 // 修正后的宏定义，确保最后一个\后面有内容
 #define K4TRADE_CREATE_INSTANCE(classname)  \
 extern "C" { \
-    classname * DLL_EXPORT create_module(YAML::Node &config) { \
+    classname * DLL_EXPORT create_mdlib(const rapidjson::Document& json_config) { \
         return new classname(config); \
     } \
 }

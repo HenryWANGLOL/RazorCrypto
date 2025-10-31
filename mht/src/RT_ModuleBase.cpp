@@ -1,6 +1,6 @@
 #include "RT_ModuleBase.h"
-#include <rapidjson/document.h>
-#include <rapidjson/filereadstream.h>
+#include "rapidjson/document.h"
+#include "rapidjson/filereadstream.h"
 #include <cstdio>
 
 // 静态成员初始化

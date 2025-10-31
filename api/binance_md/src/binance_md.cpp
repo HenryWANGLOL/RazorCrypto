@@ -536,6 +536,7 @@ private:
             bool res = m_spot_bbo_shm->on_rtn_data(ticker.m_symbol,ticker);
             // logInfo("insert data, res={}, symbol={}", res, ticker.m_symbol);
         }
+        printf("future connections done \n");
     }
 
     void parse_ubase_bookTicker(rapidjson::Document &doc){
@@ -597,6 +598,12 @@ private:
             bool res = m_spot_agg_shm->on_rtn_data(aggdata.m_symbol, aggdata);
             // logInfo("insert agg data, res={}, symbol={}", res, aggdata.m_symbol);
         }
+        params += "]";
+
+        // 用stringstream拼接JSON，避免依赖fmt库
+        std::stringstream ss;
+        ss << "{\"method\":\"SUBSCRIBE\",\"id\":" << conn_id << ",\"params\":" << params << "}";
+        return ss.str();
     }
 
     void parse_ubase_aggtrade(rapidjson::Document &doc) {
@@ -626,6 +633,11 @@ private:
             bool res = m_fut_ubase_agg_shm->on_rtn_data(aggdata.m_symbol, aggdata);
             // logInfo("insert agg data, res={}, symbol={}", res, aggdata.m_symbol);
         }
+		else {
+            printf("[spot agg] %s \n", data);
+        }
+
+        return 1;
     }
 
     bool process_md_data(

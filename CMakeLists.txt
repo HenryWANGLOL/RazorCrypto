@@ -1,10 +1,9 @@
-set(CoreServiceInclude /home/opp/RazorCrypto/mht/include)
-set(CoreServiceLib /home/opp/RazorCrypto/lib)
-set(BinReleaseFolder /home/opp/RazorCrypto/release)
-# set(PythonInclude /home/opp/anaconda3/envs/py38/include/python3.8)
-# set(PyBindInclude /home/opp/anaconda3/envs/py38/include)
+set(CoreServiceInclude /root/RazorCrypto/mht/include)
+set(CoreServiceLib /root/RazorCrypto/lib)
+set(BinReleaseFolder /root/RazorCrypto/release)
 
 add_compile_options(-Wno-unused-function)
 add_subdirectory(mht)
-add_subdirectory(api)
+
 add_subdirectory(Tools/MDRunner)
+add_subdirectory(api/binance_md)

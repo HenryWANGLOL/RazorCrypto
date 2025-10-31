@@ -22,7 +22,7 @@
 #include "RT_Common.h"
 #include "RT_MQ.h"
 #include "csv.h"
-
+#define assertm(exp, msg) assert(((void)msg, exp))
 using CreateMDLibFunc = std::unique_ptr<RT_CryptoMDBase>(*)(rapidjson::Document&);
 
 class RT_CryptoGateWay {
@@ -51,7 +51,9 @@ public:
     int start() {
         for (int i = 0; i < connections.size(); ++i) {
             rapidjson::Document& conn = connections[i];
-            void* handle = dlopen(conn["lib_path"].GetString(), RTLD_NOW | RTLD_GLOBAL);
+            printf("connecting to %s\n", conn["lib_path"].GetString());
+            void* handle = dlopen(conn["lib_path"].GetString(), RTLD_LAZY);
+            assertm(handle, dlerror());
             if (!handle) {
                 std::cerr << "无法加载动态库: " << dlerror() << std::endl;
                 return 1;
