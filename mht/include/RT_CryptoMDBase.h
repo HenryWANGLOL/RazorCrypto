@@ -1,59 +1,45 @@
-/*************************************************************************************
-ST_MddApiInterface.h
+#ifndef RT_CRYPTO_MD_BASE_H
+#define RT_CRYPTO_MD_BASE_H
 
-包含了行情接口的一些定义和接口函数
-
-Created by YufengWang, 20241226
-Copyright (c) 2021 Trigma,Inc. All rights reserved.
-*****************************************************************************/
-
-#pragma once
 #include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-
+#include "RT_ModuleBase.h"  // 假设RTModuleBase来自这里
+#include <atomic>
+#include <thread>
 #include <memory>
-#include <vector>
-#include <unordered_map>
-#include <string>
-// #include "RT_TradeDataStruct.h"
-#include "RT_MQ.h"
-#include "RT_ShmMdPlus.h"
-#include "RT_ModuleBase.h"
-#include "K4_WsSslClient.h"
 
+namespace mht_rt {
 
-#include <iostream>
-#include <cassert>
-using namespace std;
-
-class RT_CryptoMDBase : public RTModuleBase
-{
+class RT_CryptoMDBase : public RTModuleBase {
 public:
     // 构造函数
-    RT_CryptoMDBase() = default;
+    explicit RT_CryptoMDBase(rapidjson::Document& json_config);
 
-    // 带配置参数的构造函数
-    RT_CryptoMDBase(rapidjson::Document &json_config);
+    // 析构函数（确保子类资源被释放）
+    ~RT_CryptoMDBase() override;
 
-    // 析构函数
-    ~RT_CryptoMDBase() = default;
-
-    // 请求连接行情数据源，纯虚函数，子类必须实现
-    virtual int request_connect() = 0;
-
-    // 启动行情接口
-    void start();
-
-    // 初始化行情接口，返回初始化结果
+    // 初始化（连接行情源）
     int initialize();
 
+    // 启动行情接收（在独立线程中运行）
+    void start();
 
+    // 停止行情接收（核心新增功能）
+    void stop();
+
+    virtual void init_shm() = 0;
 
 protected:
+    // 纯虚函数：子类实现具体的连接逻辑
+    virtual int request_connect() = 0;
 
-    int init_shm();
-    std::string mdmqname;
-    uint64_t default_md_size;
-    bool m_bDoneConnect = false;
+    // 虚函数：子类重写以释放自身资源（如WebSocket连接、共享内存等）
+    virtual void on_stop() {}
+
+    std::atomic<bool> m_bDoneConnect{false};  // 连接是否完成
+    std::atomic<bool> m_running{false};       // 控制行情循环的原子变量
+    std::unique_ptr<std::thread> m_thread;    // 运行行情循环的线程
 };
+
+}  // namespace mht_rt
+
+#endif  // RT_CRYPTO_MD_BASE_H

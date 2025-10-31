@@ -1,24 +1,30 @@
 {
     "RazorTrade": {
         "module_name": "RazorTradeCrypto",
-        "log_path": "/home/op/RazorTrade/log"
+        "log_path": "/root/RazorCrypto/log"
     },
     "connections": [
         {
-            "lib_path": "/home/op/RazorCrypto/release/libbinance_md.so",
-            "exhange": "binance",
+            "lib_path": "/root/RazorCrypto/release/libBN_MD.so",
+            "exchange": "binance",
             "md_size": 100000,
             "spot": {
-                "bbo_shm_name": "spot_bbo",
-                "aggtrade_shm_name": "spot_aggtrade",
-                "symbols": ["btcustd"]
+                
+                "symbols": ["btcusdt", "ethusdt", "bnbusdt"],
+                "conn_count": 3,                              
+                "bbo_shm_name": "binance_spot_bbo",
+                "aggtrade_shm_name": "binance_spot_agg"
             },
             "futures": {
-                "bbo_shm_name": "future_bbo",
-                "aggtrade_shm_name": "future_aggtrade",
-                "ubase_symbols": ["btcustd_1226"],
-                "cbase_symbols": []
-            }
+                "ubase_symbols": ["btcusdt", "ethusdt"],    
+                "ubase_conn_count": 2,                        
+                "cbase_symbols": ["btcusd_perp", "ethusd_perp"],
+                "cbase_conn_count": 2,                     
+                "bbo_shm_name": "binance_fut_bbo",
+                "aggtrade_shm_name": "binance_fut_agg"
+            },
+            "latency_print_interval_ms": 5000             
+            
         }
     ]
 }
