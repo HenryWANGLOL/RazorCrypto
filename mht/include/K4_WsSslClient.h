@@ -102,11 +102,33 @@ public:
 		do_write();
 	}
 
-	void start_work() {
-		if (!m_work.joinable()) {
-			m_work = std::thread(std::bind(&ws_client_base::work, this));
-		}
-	}
+	void start_work(const std::vector<int>& cpu_cores = {}) {
+    if (!m_work.joinable()) {
+        m_work = std::thread([this, cpu_cores]() {
+            if (!cpu_cores.empty()) {
+                cpu_set_t cpuset;
+                CPU_ZERO(&cpuset);
+
+                for (int core : cpu_cores) {
+                    if (core >= 0 && core < CPU_SETSIZE) {
+                        CPU_SET(core, &cpuset);
+                        printf("Adding core %d to affinity set\n", core);
+                    } else {
+                        printf("Invalid core id: %d (ignored)\n", core);
+                    }
+                }
+
+                int ret = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+                if (ret != 0) {
+                    perror("pthread_setaffinity_np failed");
+                } else {
+                    printf("Thread bound to %zu cores\n", cpu_cores.size());
+                }
+            }
+            work();  // 启动核心逻辑
+        });
+    }
+}
 
 	void work() {
 		ioctx_.run();
@@ -258,6 +280,12 @@ private:
 			return;
 		}
 
+		for (auto const& entry : res) {
+			auto ep = entry.endpoint();
+			std::cout << "[Session " << id_ << "] resolved LB IP: "
+					<< ep.address().to_string() << ":" << ep.port() << std::endl;
+		}
+
 		if (!SSL_set_tlsext_host_name(ws_->next_layer().native_handle(), host_.c_str())) {
 			printf("failed to set host name\n");
 			re_connect();
@@ -273,6 +301,14 @@ private:
 			printf("on_connected [%d]fail to connect to host %s,err message:%s\n", id_, host_.c_str(), ec.message().c_str());
 			re_connect();
 			return;
+		}
+
+		try {
+			auto remote_ep = ws_->next_layer().next_layer().remote_endpoint();
+			std::cout << "[Session " << id_ << "] connected to real WS server: "
+					<< remote_ep.address().to_string() << ":" << remote_ep.port() << std::endl;
+		} catch (std::exception& e) {
+			std::cerr << "Failed to get remote endpoint: " << e.what() << std::endl;
 		}
 
 		ws_->control_callback(

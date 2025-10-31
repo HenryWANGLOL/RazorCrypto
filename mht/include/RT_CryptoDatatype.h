@@ -255,7 +255,7 @@ struct Bookticker
     int m_askOrderCount;
     uint64_t m_LocalTime_us;
 
-    Bookticker();
+    // Bookticker();
 };
 
 struct Trade

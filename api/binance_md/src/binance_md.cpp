@@ -147,7 +147,7 @@ public:
         m_bDoneConnect = true;
         logInfo("所有连接初始化完成：Spot({}), UBase(Future)({})",
             m_spot_conns.size(), m_ubase_conns.size());
-        return 1;
+        return 0;
     }
 
     // 重写基类on_stop：仅释放Spot和UBase资源
@@ -360,7 +360,7 @@ private:
             // 创建WS客户端
             auto conn = std::make_shared<ws_ssl_client>(conn_id, host.c_str(), "443", cb);
             conn->connect("/ws");
-            conn->start_work();
+            conn->start_work(cpu_cores);
 
             // 等待连接成功（最多重试30次）
             int try_num = 0;
@@ -420,12 +420,218 @@ private:
     // #######################################################################
     // Spot数据回调（无修改）
     // #######################################################################
+    // bool on_spot_md(char* data, size_t len, int conn_id) {
+    //     Document doc;
+    //     doc.Parse(data, len);
+    //     if(doc.HasMember("u")){
+    //         printf("[spot md] id=%d, %s\n", conn_id, data);
+    //         //parse_spot_bookTicker(doc);
+    //     }
+	// 	else {
+    //         printf("[spot agg] %s \n", data);
+    //     }
+
+    //     return 1;
+    // }
+
     bool on_spot_md(char* data, size_t len, int conn_id) {
-        Document doc;
+        
+        rapidjson::Document doc;
         doc.Parse(data, len);
-        if(doc.HasMember("u")){
-            printf("[spot md] id=%d, %s\n", conn_id, data);
-            //parse_spot_bookTicker(doc);
+        if (doc.HasMember("e")) {
+            std::string ev = std::string(doc["e"].GetString());
+            if (ev == "aggTrade") {
+                // 计算延迟
+                uint64_t event_time_ms = doc["E"].GetUint64();
+                uint64_t event_time_us = event_time_ms * 1000;
+                uint64_t local_time_us = get_current_ms_epoch() * 1000;
+                uint64_t latency = local_time_us - event_time_us;
+
+                // 更新统计
+                update_latency_stats(conn_id, latency);
+                parse_spot_aggtrade(doc);
+            }
+            // else if (ev == "bookTicker") {
+            //     parse_spot_bookTicker(doc);
+            // }
+
+        } else {
+            if (doc.HasMember("b") && doc.HasMember("B")) {
+                parse_spot_bookTicker(doc);
+            }
+        }
+        return true;
+    }
+
+    // #######################################################################
+    // UBase（Future）数据回调（无修改，仅保留）
+    // #######################################################################
+    // bool on_ubase_md(char* data, size_t len, int conn_id) {
+    //     printf("on_ubase_md: conn_id=%d, len=%zu\n", conn_id, len);
+    //     return 1;
+    // }
+
+    bool on_ubase_md(char* data, size_t len, int conn_id) {
+        rapidjson::Document doc;
+        doc.Parse(data, len);
+        if (doc.HasMember("e")) {
+            std::string ev = std::string(doc["e"].GetString());
+            if (ev == "aggTrade") {
+                // 计算延迟
+                uint64_t event_time_ms = doc["E"].GetUint64();
+                uint64_t event_time_us = event_time_ms * 1000;
+                uint64_t local_time_us = get_current_ms_epoch() * 1000;
+                uint64_t latency = local_time_us - event_time_us;
+
+                // 更新统计
+                update_latency_stats(conn_id, latency);
+                parse_ubase_aggtrade(doc);
+            }
+            else if (ev == "bookTicker") {
+                // 计算延迟
+                uint64_t event_time_ms = doc["E"].GetUint64();
+                uint64_t event_time_us = event_time_ms * 1000;
+                uint64_t local_time_us = get_current_ms_epoch() * 1000;
+                uint64_t latency = local_time_us - event_time_us;
+
+                // 更新统计
+                update_latency_stats(conn_id, latency);
+                parse_ubase_bookTicker(doc);
+            }
+
+        } else {
+            logInfo("msg received {}", data);
+        }
+        return true;
+    }
+
+    // 现货期货数据格式不一样，先不规范化
+
+    void parse_spot_bookTicker(rapidjson::Document &doc){
+        uint64_t updateid = doc["u"].GetUint64();
+        if (updateid < m_spot_bbo_update_id) {
+            return;
+        } else {
+            m_spot_bbo_update_id = updateid;
+        }
+
+        Bookticker ticker;
+		ticker.m_type = ProductType::SPOT;
+		// ticker.exchange = ShortExchange::BINANCE;
+        // ticker.exch
+
+        auto symbol = std::string(doc["s"].GetString());
+        std::strncpy(ticker.m_symbol, symbol.data(), sizeof(ticker.m_symbol) - 1);
+        ticker.m_updateId = updateid;
+		ticker.m_LocalTime_us = get_current_ms_epoch()*1000;
+        // ticker.m_eventTimestamp = doc["E"].GetUint64();
+        // ticker.m_tradeTimestamp = doc["T"].GetUint64();
+        ticker.m_askPrice = atof(doc["a"].GetString());
+        ticker.m_askVol = atof(doc["A"].GetString());
+        ticker.m_bidPrice = atof(doc["b"].GetString());
+        ticker.m_bidVol = atof(doc["B"].GetString());
+
+		//printf("on spot bookticker md:%s\n",ticker.symbol);
+        if(m_spot_bbo_shm != nullptr){
+            bool res = m_spot_bbo_shm->on_rtn_data(ticker.m_symbol,ticker);
+            // logInfo("insert data, res={}, symbol={}", res, ticker.m_symbol);
+        }
+        printf("future connections done \n");
+    }
+
+    void parse_ubase_bookTicker(rapidjson::Document &doc){
+        uint64_t updateid = doc["u"].GetUint64();
+        if (updateid < m_fut_bbo_update_id) {
+            return;
+        } else {
+            m_fut_bbo_update_id = updateid;
+        }
+
+        Bookticker ticker;
+		ticker.m_type = ProductType::UMARGIN;
+		// ticker.exch = K4Exchange::BINANCE;
+        
+		auto symbol = std::string(doc["s"].GetString());
+        std::strncpy(ticker.m_symbol, symbol.data(), sizeof(ticker.m_symbol) - 1);
+        ticker.m_updateId = updateid;
+		ticker.m_LocalTime_us = get_current_ms_epoch() * 1000;
+        ticker.m_eventTimestamp = doc["E"].GetUint64();
+        ticker.m_tradeTimestamp = doc["T"].GetUint64();
+        ticker.m_askPrice = atof(doc["a"].GetString());
+        ticker.m_askVol = atof(doc["A"].GetString());
+        ticker.m_bidPrice = atof(doc["b"].GetString());
+        ticker.m_bidVol = atof(doc["B"].GetString());
+
+        if(m_fut_ubase_bbo_shm != nullptr){
+			//std::cout<<"wr md:"<<ticker.symbol<<",ask px:"<<ticker.ask_price<<std::endl;
+            bool ret = m_fut_ubase_bbo_shm->on_rtn_data(ticker.m_symbol,ticker);
+            // logInfo("insert data, res={}, symbol={}", ret, ticker.m_symbol);
+			if(!ret)
+				std::cout<<"wr ubase fail:"<<ticker.m_symbol<<std::endl;
+        }
+    }
+
+    void parse_spot_aggtrade(rapidjson::Document &doc) {
+        uint64_t updateid = doc["a"].GetUint64();
+        if (updateid < m_spot_agg_update_id) {
+            return;
+        } else {
+            m_spot_agg_update_id = updateid;
+        }
+
+        AggTrade aggdata;
+        aggdata.m_type = ProductType::SPOT;
+
+        auto symbol = std::string(doc["s"].GetString());
+        std::strncpy(aggdata.m_symbol, symbol.data(), sizeof(aggdata.m_symbol) - 1);
+        aggdata.m_aggTradeId = updateid;
+        aggdata.m_firstTradeId = doc["f"].GetUint64();
+        aggdata.m_lastTradeId = doc["l"].GetUint64();
+        aggdata.m_price = atof(doc["p"].GetString());
+        aggdata.m_vol = atof(doc["q"].GetString());
+        aggdata.m_isBuy = doc["m"].GetBool();
+        aggdata.m_eventTimestamp = doc["E"].GetUint64();
+        aggdata.m_tradeTimestamp = doc["T"].GetUint64();
+        aggdata.m_LocalTime_us = get_current_ms_epoch() * 1000;
+
+        if (m_spot_agg_shm != nullptr) {
+            bool res = m_spot_agg_shm->on_rtn_data(aggdata.m_symbol, aggdata);
+            // logInfo("insert agg data, res={}, symbol={}", res, aggdata.m_symbol);
+        }
+        params += "]";
+
+        // 用stringstream拼接JSON，避免依赖fmt库
+        std::stringstream ss;
+        ss << "{\"method\":\"SUBSCRIBE\",\"id\":" << conn_id << ",\"params\":" << params << "}";
+        return ss.str();
+    }
+
+    void parse_ubase_aggtrade(rapidjson::Document &doc) {
+        uint64_t updateid = doc["a"].GetUint64();
+        if (updateid < m_fut_agg_update_id) {
+            return;
+        } else {
+            m_fut_agg_update_id = updateid;
+        }
+
+        AggTrade aggdata;
+        aggdata.m_type = ProductType::UMARGIN;
+
+        auto symbol = std::string(doc["s"].GetString());
+        std::strncpy(aggdata.m_symbol, symbol.data(), sizeof(aggdata.m_symbol) - 1);
+        aggdata.m_aggTradeId = updateid;
+        aggdata.m_firstTradeId = doc["f"].GetUint64();
+        aggdata.m_lastTradeId = doc["l"].GetUint64();
+        aggdata.m_price = atof(doc["p"].GetString());
+        aggdata.m_vol = atof(doc["q"].GetString());
+        aggdata.m_isBuy = doc["m"].GetBool();
+        aggdata.m_eventTimestamp = doc["E"].GetUint64();
+        aggdata.m_tradeTimestamp = doc["T"].GetUint64();
+        aggdata.m_LocalTime_us = get_current_ms_epoch() * 1000;
+
+        if (m_fut_ubase_agg_shm != nullptr) {
+            bool res = m_fut_ubase_agg_shm->on_rtn_data(aggdata.m_symbol, aggdata);
+            // logInfo("insert agg data, res={}, symbol={}", res, aggdata.m_symbol);
         }
 		else {
             printf("[spot agg] %s \n", data);
@@ -433,15 +639,6 @@ private:
 
         return 1;
     }
-
-    // #######################################################################
-    // UBase（Future）数据回调（无修改，仅保留）
-    // #######################################################################
-    bool on_ubase_md(char* data, size_t len, int conn_id) {
-        printf("on_ubase_md: conn_id=%d, len=%zu\n", conn_id, len);
-        return 1;
-    }
-
 
     bool process_md_data(
         char* data, size_t len, int conn_id, 
@@ -519,6 +716,27 @@ private:
     // 启动延迟打印线程（仅打印Spot/UBase）
     void start_latency_print_timer() {
         m_print_thread = std::thread([this]() {
+            if (!cpu_cores.empty()) {
+                cpu_set_t cpuset;
+                CPU_ZERO(&cpuset);
+
+                for (int core : cpu_cores) {
+                    if (core >= 0 && core < CPU_SETSIZE) {
+                        CPU_SET(core, &cpuset);
+                        // printf("Adding core %d to affinity set\n", core);
+                    } else {
+                        // printf("Invalid core id: %d (ignored)\n", core);
+                    }
+                }
+
+                int ret = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+                if (ret != 0) {
+                    // perror("pthread_setaffinity_np failed");
+                } else {
+                    // printf("Thread bound to %zu cores\n", cpu_cores.size());
+                }
+            }
+
             while (m_print_running) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(m_latency_interval_ms));
                 print_latency_stats();
@@ -570,6 +788,7 @@ private:
                 product, fastest.conn_id, fastest.get_avg_latency());
         }
     }
+    
     // #######################################################################
     // 停止连接（仅Spot和UBase）
     // #######################################################################
@@ -608,43 +827,43 @@ private:
         return res;
     }
 
-    // #######################################################################
-    // Spot行情解析（无修改）
-    // #######################################################################
-    void parse_spot_bookTicker(Document& doc) {
-        if (!m_spot_bbo_shm) return;
-        Bookticker ticker;
-        ticker.m_type = ProductType::SPOT;
-        fill_bookticker_data(ticker, doc);
-        m_spot_bbo_shm->on_rtn_data(ticker.m_symbol, ticker);
-    }
+    // // #######################################################################
+    // // Spot行情解析（无修改）
+    // // #######################################################################
+    // void parse_spot_bookTicker(Document& doc) {
+    //     if (!m_spot_bbo_shm) return;
+    //     Bookticker ticker;
+    //     ticker.m_type = ProductType::SPOT;
+    //     fill_bookticker_data(ticker, doc);
+    //     m_spot_bbo_shm->on_rtn_data(ticker.m_symbol, ticker);
+    // }
 
-    void parse_spot_aggtrade(Document& doc) {
-        if (!m_spot_agg_shm) return;
-        AggTrade agg;
-        agg.m_type = ProductType::SPOT;
-        fill_aggtrade_data(agg, doc);
-        m_spot_agg_shm->on_rtn_data(agg.m_symbol, agg);
-    }
+    // void parse_spot_aggtrade(Document& doc) {
+    //     if (!m_spot_agg_shm) return;
+    //     AggTrade agg;
+    //     agg.m_type = ProductType::SPOT;
+    //     fill_aggtrade_data(agg, doc);
+    //     m_spot_agg_shm->on_rtn_data(agg.m_symbol, agg);
+    // }
 
-    // #######################################################################
-    // UBase（Future）行情解析（无修改，仅保留）
-    // #######################################################################
-    void parse_ubase_bookTicker(Document& doc) {
-        if (!m_fut_ubase_bbo_shm) return;
-        Bookticker ticker;
-        ticker.m_type = ProductType::UMARGIN;
-        fill_bookticker_data(ticker, doc);
-        m_fut_ubase_bbo_shm->on_rtn_data(ticker.m_symbol, ticker);
-    }
+    // // #######################################################################
+    // // UBase（Future）行情解析（无修改，仅保留）
+    // // #######################################################################
+    // void parse_ubase_bookTicker(Document& doc) {
+    //     if (!m_fut_ubase_bbo_shm) return;
+    //     Bookticker ticker;
+    //     ticker.m_type = ProductType::UMARGIN;
+    //     fill_bookticker_data(ticker, doc);
+    //     m_fut_ubase_bbo_shm->on_rtn_data(ticker.m_symbol, ticker);
+    // }
 
-    void parse_ubase_aggtrade(Document& doc) {
-        if (!m_fut_ubase_agg_shm) return;
-        AggTrade agg;
-        agg.m_type = ProductType::UMARGIN;
-        fill_aggtrade_data(agg, doc);
-        m_fut_ubase_agg_shm->on_rtn_data(agg.m_symbol, agg);
-    }
+    // void parse_ubase_aggtrade(Document& doc) {
+    //     if (!m_fut_ubase_agg_shm) return;
+    //     AggTrade agg;
+    //     agg.m_type = ProductType::UMARGIN;
+    //     fill_aggtrade_data(agg, doc);
+    //     m_fut_ubase_agg_shm->on_rtn_data(agg.m_symbol, agg);
+    // }
 
     // #######################################################################
     // 行情数据填充（无修改，通用逻辑）
@@ -699,6 +918,12 @@ private:
     std::string fut_bbo_shm_name;         // UBase bookTicker共享内存名
     std::string fut_aggtrade_shm_name;    // UBase aggTrade共享内存名
     int md_size = 100000;                 // 共享内存大小
+
+    // 多个返回 记载各个数据最新update id
+    uint64_t m_spot_bbo_update_id;
+    uint64_t m_spot_agg_update_id;
+    uint64_t m_fut_bbo_update_id;
+    uint64_t m_fut_agg_update_id;
 
     // WebSocket连接容器
     std::vector<std::shared_ptr<ws_ssl_client>> m_spot_conns;   // Spot连接

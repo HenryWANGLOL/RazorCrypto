@@ -82,6 +82,8 @@ protected:
 
     int m_id;
 
+    std::vector<int> cpu_cores; // 配置文件中绑核信息
+
 private:
     bool verifyCpuAffinity(const cpu_set_t& cpuset);
 

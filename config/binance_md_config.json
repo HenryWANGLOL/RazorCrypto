@@ -5,6 +5,10 @@
     },
     "connections": [
         {
+            "RazorTrade": {
+                "module_name": "binance_md",
+                "log_path": "/home/opp/RazorCrypto/log"
+            },
             "lib_path": "/root/RazorCrypto/release/libBN_MD.so",
             "exchange": "binance",
             "md_size": 100000,

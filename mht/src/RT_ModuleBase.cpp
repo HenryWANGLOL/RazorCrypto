@@ -133,7 +133,7 @@ bool RTModuleBase::configureCpuAffinityFromJson() {
         return false;
     }
 
-    std::vector<int> cpu_cores;
+    // std::vector<int> cpu_cores;
     try {
         for (auto &core : cpu_config.GetArray()) {
             if (core.IsInt())
